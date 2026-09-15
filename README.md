@@ -12,7 +12,7 @@
 
 ## Building
 
-1. Install Axiom latest
+0. Install Axiom latest
 
 - Prequisites: Make sure you have Rust, and LLVM installed. `llc` needs to be in path.
   - You also need the GitHub CLI; that is is how authentication is handled.
