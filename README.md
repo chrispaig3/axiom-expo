@@ -6,7 +6,7 @@
 
 ## Motivation for Expo
 
-- Expo was initially written in Rust. The name was inspired by the markers and dry erasers.
+- Expo was initially written in Rust. The name was inspired by the marker and dry eraser brand.
 
 > **Description**: Expo is a tool for managing the accessibility of GitHub repositories at scale.
 
