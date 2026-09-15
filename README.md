@@ -15,7 +15,12 @@
 1. Install Axiom latest
 
 - Prequisites: Make sure you have Rust, and LLVM installed. `llc` needs to be in path.
+  - You also need the GitHub CLI; that is is how authentication is handled.
 - clone `https://github.com/chrispaig3/Axiom`
 - run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path
 - install `just` `cargo install just`
-- run `just` 
+- run `just`
+
+## Basic Usage
+
+ expo delete owner/repo
