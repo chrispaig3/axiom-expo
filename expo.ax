@@ -1,0 +1,14 @@
+; expo.ax - entry for the Axiom port of `expo` v2.0.1.
+;
+; Black-box port: the reference binary wraps `gh`:
+; `gh auth status -h github.com` first, then per-subcommand `gh api` calls.
+; delete dry-runs in order; delete --yes, visibility and archive run one
+; `gh api` per valid repo through a bounded pool; create runs in order and
+; stops on the first InvalidRepository or gh failure. Valid means exactly
+; one '/'. Routing: version to stdout, usage and errors to stderr.
+(import IO)
+(import src.Main)
+
+(:: main Int)
+;@axiom:effect(io)
+(fn (main) (expoMain))

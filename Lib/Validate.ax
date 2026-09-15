@@ -1,0 +1,86 @@
+; Lib/Validate - pure expo argument checks over argv strings.
+(import Str)
+(import Lib.Types)
+
+; Count '/' (47) from i.
+;@axiom:restrict(no-io,no-foreign)
+;@axiom:pre((>= i 0))
+;@axiom:post((>= result 0))
+(pub :: slashCount (-> String Int Int Int))
+(pub fn (slashCount s i acc)
+  (if (>= i (strLen s))
+    acc
+    (if (== (strByte s i) 47)
+      (slashCount s (+ i 1) (+ acc 1))
+      (slashCount s (+ i 1) acc))))
+
+; A repo is valid with exactly one '/'. Empty halves allowed:
+; "/repo" and "owner/" were accepted by the reference binary.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: isValidRepo (-> String Bool))
+(pub fn (isValidRepo r) (== (slashCount r 0 0) 1))
+
+; Text after the first '/'. Only call on valid repos.
+;@axiom:restrict(no-io,no-foreign)
+;@axiom:pre((== (slashCount s 0 0) 1))
+(pub :: repoName (-> String String))
+(pub fn (repoName s) (repoNameFrom s 0))
+
+;@axiom:restrict(no-io,no-foreign)
+;@axiom:pre((>= i 0))
+(pub :: repoNameFrom (-> String Int String))
+(pub fn (repoNameFrom s i)
+  (if (>= i (strLen s))
+    ""
+    (if (== (strByte s i) 47)
+      (strSlice s (+ i 1) (- (strLen s) (+ i 1)))
+      (repoNameFrom s (+ i 1)))))
+
+; Leading '-' marks a flag slot for expo's parsers.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: isFlag (-> String Bool))
+(pub fn (isFlag s)
+  (if (== (strLen s) 0)
+    false
+    (== (strByte s 0) 45)))
+
+; Substring test used for the create "already exists" branch.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: containsSub (-> String String Bool))
+(pub fn (containsSub hay needle)
+  (match (strFind hay needle 0)
+    ((None) false)
+    ((Some _) true)))
+
+; Drop one trailing LF (and a CR before it) from captured `gh` stderr so
+; the interpolated failure line matches the reference single blank line.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: trimErr (-> String String))
+(pub fn (trimErr s)
+  (let ((n (strLen s)))
+    (if (== n 0)
+      s
+      (if (== (strByte s (- n 1)) 10)
+        (let ((m (- n 1)))
+          (if (&& (> m 0) (== (strByte s (- m 1)) 13))
+            (strSlice s 0 (- m 1))
+            (strSlice s 0 m)))
+        s))))
+
+; argv[1] to a command tag.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: parseCmd (-> String (Option Cmd)))
+(pub fn (parseCmd s)
+  (if (strEq s "delete") (Some (Delete))
+    (if (strEq s "visibility") (Some (Visibility))
+      (if (strEq s "archive") (Some (Archive))
+        (if (strEq s "create") (Some (Create))
+          (None))))))
+
+; visibility state word, exact lowercase only.
+;@axiom:restrict(no-io,no-foreign)
+(pub :: parseVis (-> String (Option VisState)))
+(pub fn (parseVis s)
+  (if (strEq s "public") (Some (Public))
+    (if (strEq s "private") (Some (Private))
+      (None))))

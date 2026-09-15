@@ -1,0 +1,31 @@
+; Lib/Types - shared expo shapes: subcommands, visibility, option boxes.
+(import Str)
+(import Fmt)
+
+(pub data Cmd
+  (Delete)
+  (Visibility)
+  (Archive)
+  (Create))
+
+(pub data VisState
+  (Public)
+  (Private))
+
+; Optional --description: BEmpty = absent, BFull d = first value wins.
+(pub data DescOpt (a)
+  (DNone)
+  (DSome a))
+
+; Generic pair for bundling a repo with its slot index.
+(pub struct Pair (a b)
+  (fst : a)
+  (snd : b))
+
+; Mutable success counter for batch loops.
+(pub struct Counter
+  (mut n : Int))
+
+; Structured expo log line; main installs the handler.
+(effect Log
+  (logLine :: (-> String Int)))

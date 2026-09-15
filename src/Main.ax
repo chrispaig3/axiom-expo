@@ -1,0 +1,59 @@
+; src/Main - expo dispatch: usage routing, auth gate, subcommands.
+(import IO)
+(import Str)
+(import Vec)
+(import Sys)
+(import Err)
+(import Fmt)
+(import Par)
+(import Mem)
+(import Lib.Types)
+(import Lib.Validate)
+(import Lib.Gh)
+(import src.Commands)
+
+(pub :: usageText String)
+(pub fn (usageText)
+  "expo v2.0.1\n\nUsage: expo <COMMAND>\n\nCommands:\n  delete <REPOS>... [--yes]        Delete repositories\n  visibility <public|private> <REPOS>...  Change repository visibility\n  archive <REPOS>... [--unarchive] Archive or unarchive repositories\n  create <REPOS>... [--public] [--description <DESC>]...  Create repositories\n\nOptions:\n  -h, --help     Print help\n  -v, --version  Print version\n")
+
+; Usage always goes to stderr in the reference binary.
+;@axiom:effect(io)
+(pub :: printUsage (-> Int Int))
+(pub fn (printUsage code)
+  {
+    (writeStr stderr (usageText))
+    code
+  })
+
+; Entry dispatch. Auth gates every subcommand; help/version short-circuit.
+;@axiom:effect(io)
+(pub :: expoMain Int)
+(pub fn (expoMain)
+  (handle
+    (region outer
+      {
+        (if (< sysArgc 2)
+          (printUsage 1)
+          (let ((cmd (sysArg 1)))
+            (if (|| (strEq cmd "-h") (strEq cmd "--help"))
+              (printUsage 0)
+              (if (|| (strEq cmd "-v") (strEq cmd "--version"))
+                {
+                  (println "expo v2.0.1")
+                  0
+                }
+                (match (parseCmd cmd)
+                  ((None)
+                    {
+                      (eprintln "Error: unknown command '{cmd}'")
+                      (printUsage 1)
+                    })
+                  ((Some c)
+                    (match c
+                      ((Delete) (runDelete 2 sysArgc))
+                      ((Visibility) (runVisibility 2 sysArgc))
+                      ((Archive) (runArchive 2 sysArgc))
+                      ((Create) (runCreate 2 sysArgc)))))))))
+      })
+    (Log IO Alloc Mut)
+    (lambda (m) { (eprintln m) 0 })))
