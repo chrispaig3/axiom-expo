@@ -8,7 +8,7 @@
 
 - Expo was initially written in Rust. The name was inspired by the markers and dry erasers.
 
-> **Description**: Expo is a tool for managing the accessability of GitHub repositories at scale.
+> **Description**: Expo is a tool for managing the accessibility of GitHub repositories at scale.
 
 ## Building
 
