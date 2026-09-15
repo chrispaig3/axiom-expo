@@ -21,7 +21,7 @@
 - install `just` `cargo install just`
 - run `just`
 
-
+> The binary size of Expo is only 74.5 kb
 
 ## Basic Usage
 
