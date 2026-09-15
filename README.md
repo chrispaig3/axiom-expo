@@ -18,7 +18,7 @@
   - You also need the GitHub CLI; that is is how authentication is handled.
 - clone `https://github.com/chrispaig3/Axiom`
 - run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path
-- install `just` `cargo install just`
+- install the build tool `cargo install just`
 - run `just`
 
 > The binary size of Expo is only 74.5 kb
