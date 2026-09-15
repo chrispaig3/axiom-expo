@@ -26,4 +26,4 @@
 ## Basic Usage
 
 - `expo delete owner/repo`
-- expo help
+- `expo help`
