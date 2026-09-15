@@ -20,7 +20,7 @@
 - run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path
 1. install the build tool `cargo install just`
 2. run `just`
-
+3. add it to PATH
 > The binary size of Expo is only 74.5 kb
 
 ## Basic Usage
