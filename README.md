@@ -10,4 +10,12 @@
 
 > **Description**: Expo is a tool for managing the accessability of GitHub repositories at scale.
 
- 
+## Building
+
+1. Install Axiom latest
+
+- Prequisites: Make sure you have Rust, and LLVM installed. `llc` needs to be in path.
+- clone `https://github.com/chrispaig3/Axiom`
+- run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path
+- install `just` `cargo install just`
+- run `just` 
