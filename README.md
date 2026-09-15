@@ -21,6 +21,9 @@
 - install `just` `cargo install just`
 - run `just`
 
+
+
 ## Basic Usage
 
- expo delete owner/repo
+- `expo delete owner/repo`
+- expo help
