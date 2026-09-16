@@ -46,7 +46,11 @@
       (vecPush v "PATCH")
       (vecPush v (strConcat "repos/" repo))
       (vecPush v "-f")
-      (vecPush v (if isPrivate "private=true" "private=false"))
+      (vecPush
+        v
+        (if isPrivate
+          "private=true"
+          "private=false"))
       v
     }))
 
@@ -61,7 +65,11 @@
       (vecPush v "PATCH")
       (vecPush v (strConcat "repos/" repo))
       (vecPush v "-f")
-      (vecPush v (if doArchive "archived=true" "archived=false"))
+      (vecPush
+        v
+        (if doArchive
+          "archived=true"
+          "archived=false"))
       v
     }))
 
@@ -79,14 +87,19 @@
       (vecPush v "-f")
       (vecPush v (strConcat "name=" (repoName repo)))
       (vecPush v "-f")
-      (vecPush v (if isPublic "private=false" "private=true"))
+      (vecPush
+        v
+        (if isPublic
+          "private=false"
+          "private=true"))
       (match descOpt
         ((DNone) 0)
         ((DSome d)
           {
             (vecPush v "-f")
             (vecPush v (strConcat "description=" d))
-          }))
+          }
+        ))
       v
     }))
 
@@ -119,10 +132,12 @@
             {
               (eprintln "Error: AuthenticationFailed")
               1
-            }))
+            })
+        )
         ((Err _)
           {
             (eprintln "Error: CommandExecution")
             2
-          }))
+          }
+        ))
     }))

@@ -11,4 +11,5 @@
 
 (:: main Int)
 ;@axiom:effect(io)
-(fn (main) (expoMain))
+(fn (main)
+  (expoMain))

@@ -51,7 +51,8 @@
 ; Single-quote a shell word: 'abc' -> ''abc'', with embedded ' as '\''.
 ;@axiom:restrict(no-io,no-foreign)
 (pub :: shellQuote (-> String String))
-(pub fn (shellQuote s) (shellQuoteFrom s 0 (strConcat "'" "")))
+(pub fn (shellQuote s)
+  (shellQuoteFrom s 0 (strConcat "'" "")))
 
 ;@axiom:restrict(no-io,no-foreign)
 (pub :: shellQuoteFrom (-> String Int String String))
@@ -94,138 +95,174 @@
 (pub :: runBatchDelete (-> (Vec String) Int))
 (pub fn (runBatchDelete repos)
   (region batch
-    (let ((ctr (Counter 0)) (n (vecLen repos)))
-      {
-        (let ((cmds vecNew) (mut i 0))
-          {
-            (while (< i n)
-              {
-                (let ((r (vecGetStr repos i)))
-                  (if (isValidRepo r)
-                    (vecPush cmds (shWrap (ghDeleteArgv r) " > /dev/null 2> /dev/null"))
-                    (let ((skip vecNew))
-                      {
-                        (vecPush skip "/usr/bin/true")
-                        (vecPush cmds skip)
-                      })))
-                (set i (+ i 1))
-              })
-            (let ((codes (parRunAll cmds 8)) (mut k 0))
-              {
-                (while (< k n)
-                  {
-                    (let ((r (vecGetStr repos k)) (c (cast Int (vecGet codes k))))
-                      (if (isValidRepo r)
-                        (if (== c 0)
-                          {
-                            (println "Repository {r} deleted.")
-                            (set ctr.n (+ ctr.n 1))
-                            0
-                          }
-                          0)
-                        0))
-                    (set k (+ k 1))
-                  })
-                ctr.n
-              })
-          })
-      })))
+    (let (
+      (ctr (Counter 0))
+      (n (vecLen repos))
+    )
+      (let (
+        (cmds vecNew)
+        (mut i 0)
+      )
+        {
+          (while (< i n)
+            {
+              (let ((r (vecGetStr repos i)))
+                (if (isValidRepo r)
+                  (vecPush cmds (shWrap (ghDeleteArgv r) " > /dev/null 2> /dev/null"))
+                  (let ((skip vecNew))
+                    {
+                      (vecPush skip "/usr/bin/true")
+                      (vecPush cmds skip)
+                    })))
+              (set i (+ i 1))
+            })
+          (let (
+            (codes (parRunAll cmds 8))
+            (mut k 0)
+          )
+            {
+              (while (< k n)
+                {
+                  (let (
+                    (r (vecGetStr repos k))
+                    (c (cast Int (vecGet codes k)))
+                  )
+                    (if (isValidRepo r)
+                      (if (== c 0)
+                        {
+                          (println "Repository {r} deleted.")
+                          (set ctr.n (+ ctr.n 1))
+                          0
+                        }
+                        0)
+                      0))
+                  (set k (+ k 1))
+                })
+              ctr.n
+            })
+        }))))
 
 ; visibility batch: `gh api -X PATCH -f private=B` per valid repo.
 ;@axiom:effect(io)
 (pub :: runBatchVisibility (-> (Vec String) VisState Int))
 (pub fn (runBatchVisibility repos vs)
   (region batch
-    (let ((ctr (Counter 0)) (n (vecLen repos)))
-      {
-        (let ((cmds vecNew) (mut i 0))
-          {
-            (while (< i n)
-              {
-                (let ((r (vecGetStr repos i)))
-                  (if (isValidRepo r)
-                    (let ((priv (match vs ((Public) false) ((Private) true))))
-                      (vecPush cmds (shWrap (ghPrivateArgv r priv) " > /dev/null 2> /dev/null")))
-                    (let ((skip vecNew))
-                      {
-                        (vecPush skip "/usr/bin/true")
-                        (vecPush cmds skip)
-                      })))
-                (set i (+ i 1))
-              })
-            (let ((codes (parRunAll cmds 8)) (mut k 0))
-              {
-                (while (< k n)
-                  {
-                    (let ((r (vecGetStr repos k)) (c (cast Int (vecGet codes k))))
-                      (if (isValidRepo r)
-                        (if (== c 0)
-                          {
-                            (match vs
-                              ((Public) (println "Repository {r} visibility changed to Public."))
-                              ((Private) (println "Repository {r} visibility changed to Private.")))
-                            (set ctr.n (+ ctr.n 1))
-                            0
-                          }
-                          0)
-                        0))
-                    (set k (+ k 1))
-                  })
-                ctr.n
-              })
-          })
-      })))
+    (let (
+      (ctr (Counter 0))
+      (n (vecLen repos))
+    )
+      (let (
+        (cmds vecNew)
+        (mut i 0)
+      )
+        {
+          (while (< i n)
+            {
+              (let ((r (vecGetStr repos i)))
+                (if (isValidRepo r)
+                  (let ((priv 
+                    (match vs
+                      ((Public) false)
+                      ((Private) true))))
+                    (vecPush cmds (shWrap (ghPrivateArgv r priv) " > /dev/null 2> /dev/null")))
+                  (let ((skip vecNew))
+                    {
+                      (vecPush skip "/usr/bin/true")
+                      (vecPush cmds skip)
+                    })))
+              (set i (+ i 1))
+            })
+          (let (
+            (codes (parRunAll cmds 8))
+            (mut k 0)
+          )
+            {
+              (while (< k n)
+                {
+                  (let (
+                    (r (vecGetStr repos k))
+                    (c (cast Int (vecGet codes k)))
+                  )
+                    (if (isValidRepo r)
+                      (if (== c 0)
+                        {
+                          (match vs
+                            ((Public) (println "Repository {r} visibility changed to Public."))
+                            ((Private) (println "Repository {r} visibility changed to Private.")))
+                          (set ctr.n (+ ctr.n 1))
+                          0
+                        }
+                        0)
+                      0))
+                  (set k (+ k 1))
+                })
+              ctr.n
+            })
+        }))))
 
 ; archive batch: `gh api -X PATCH -f archived=B` per valid repo.
 ;@axiom:effect(io)
 (pub :: runBatchArchive (-> (Vec String) Bool Int))
 (pub fn (runBatchArchive repos doArchive)
   (region batch
-    (let ((ctr (Counter 0)) (n (vecLen repos)))
-      {
-        (let ((cmds vecNew) (mut i 0))
-          {
-            (while (< i n)
-              {
-                (let ((r (vecGetStr repos i)))
-                  (if (isValidRepo r)
-                    (vecPush cmds (shWrap (ghArchivedArgv r doArchive) " > /dev/null 2> /dev/null"))
-                    (let ((skip vecNew))
-                      {
-                        (vecPush skip "/usr/bin/true")
-                        (vecPush cmds skip)
-                      })))
-                (set i (+ i 1))
-              })
-            (let ((codes (parRunAll cmds 8)) (mut k 0))
-              {
-                (while (< k n)
-                  {
-                    (let ((r (vecGetStr repos k)) (c (cast Int (vecGet codes k))))
-                      (if (isValidRepo r)
-                        (if (== c 0)
-                          {
-                            (if doArchive
-                              (println "Repository {r} archived.")
-                              (println "Repository {r} unarchived."))
-                            (set ctr.n (+ ctr.n 1))
-                            0
-                          }
-                          0)
-                        0))
-                    (set k (+ k 1))
-                  })
-                ctr.n
-              })
-          })
-      })))
+    (let (
+      (ctr (Counter 0))
+      (n (vecLen repos))
+    )
+      (let (
+        (cmds vecNew)
+        (mut i 0)
+      )
+        {
+          (while (< i n)
+            {
+              (let ((r (vecGetStr repos i)))
+                (if (isValidRepo r)
+                  (vecPush cmds (shWrap (ghArchivedArgv r doArchive) " > /dev/null 2> /dev/null"))
+                  (let ((skip vecNew))
+                    {
+                      (vecPush skip "/usr/bin/true")
+                      (vecPush cmds skip)
+                    })))
+              (set i (+ i 1))
+            })
+          (let (
+            (codes (parRunAll cmds 8))
+            (mut k 0)
+          )
+            {
+              (while (< k n)
+                {
+                  (let (
+                    (r (vecGetStr repos k))
+                    (c (cast Int (vecGet codes k)))
+                  )
+                    (if (isValidRepo r)
+                      (if (== c 0)
+                        {
+                          (if doArchive
+                            (println "Repository {r} archived.")
+                            (println "Repository {r} unarchived."))
+                          (set ctr.n (+ ctr.n 1))
+                          0
+                        }
+                        0)
+                      0))
+                  (set k (+ k 1))
+                })
+              ctr.n
+            })
+        }))))
 
 ; delete handler: dry-run in order, or concurrent `gh` with --yes.
 ; Validation runs before auth, matching the reference routing.
 ;@axiom:effect(io)
 (pub :: runDelete (-> Int Int Int))
 (pub fn (runDelete from n)
-  (let ((repos (collectLenient from n)) (yes (hasFlag "--yes" from n)))
+  (let (
+    (repos (collectLenient from n))
+    (yes (hasFlag "--yes" from n))
+  )
     (if (== (vecLen repos) 0)
       {
         (eprintln "Error: delete requires at least one repository")
@@ -267,7 +304,8 @@
           {
             (eprintln "Error: visibility must be 'public' or 'private'")
             1
-          })
+          }
+        )
         ((Some vs)
           (let ((repos (collectLenient (+ from 1) n)))
             (if (== (vecLen repos) 0)
@@ -280,13 +318,17 @@
                 {
                   (runBatchVisibility repos vs)
                   0
-                }))))))))
+                })))
+        )))))
 
 ; archive handler: --unarchive flips the archived bit.
 ;@axiom:effect(io)
 (pub :: runArchive (-> Int Int Int))
 (pub fn (runArchive from n)
-  (let ((repos (collectLenient from n)) (un (hasFlag "--unarchive" from n)))
+  (let (
+    (repos (collectLenient from n))
+    (un (hasFlag "--unarchive" from n))
+  )
     (if (== (vecLen repos) 0)
       {
         (eprintln "Error: archive requires at least one repository")
@@ -295,7 +337,11 @@
       (if (!= (doAuth) 0)
         1
         {
-          (runBatchArchive repos (if un false true))
+          (runBatchArchive
+            repos
+            (if un
+              false
+              true))
           0
         }))))
 
@@ -304,7 +350,14 @@
 (pub :: runCreate (-> Int Int Int))
 (pub fn (runCreate from n)
   (region cparse
-    (let ((repos vecNew) (mut isPublic false) (mut desc (DNone)) (mut haveDesc false) (mut i from) (mut bad ""))
+    (let (
+      (repos vecNew)
+      (mut isPublic false)
+      (mut desc (DNone))
+      (mut haveDesc false)
+      (mut i from)
+      (mut bad "")
+    )
       {
         (while (< i n)
           (let ((a (sysArg i)))
@@ -365,7 +418,10 @@
     (let ((r (vecGetStr repos idx)))
       (if (isValidRepo r)
         (let ((res (runCreateOne r isPublic descOpt)))
-          (let ((code res.fst) (msg res.snd))
+          (let (
+            (code res.fst)
+            (msg res.snd)
+          )
             (if (== code 0)
               {
                 (println "Repository {r} created successfully.")
@@ -377,15 +433,13 @@
                   (eprintln "Error: GitHubCommandFailed")
                   1
                 }
-                {
-                  (let ((clean (trimErr msg)))
-                    {
-                      (eprintln "Failed to create repository {r}: {clean}")
-                      (eprintln "")
-                      (eprintln "Error: GitHubCommandFailed")
-                      1
-                    })
-                }))))
+                (let ((clean (trimErr msg)))
+                  {
+                    (eprintln "Failed to create repository {r}: {clean}")
+                    (eprintln "")
+                    (eprintln "Error: GitHubCommandFailed")
+                    1
+                  })))))
         {
           (eprintln "Error: InvalidRepository(\"{r}\")")
           1
@@ -419,8 +473,13 @@
 ; Shell line for one create: stdout to /dev/null, stderr to tmp.
 (pub :: createShell (-> String Bool (DescOpt String) String String))
 (pub fn (createShell repo isPublic descOpt tmp)
-  (let ((base (strConcat (strConcat "gh api -X POST user/repos -f name=" (shellQuote (repoName repo))) (if isPublic " -f private=false" " -f private=true"))))
-    (let ((withDesc
+  (let ((base 
+    (strConcat
+      (strConcat "gh api -X POST user/repos -f name=" (shellQuote (repoName repo)))
+      (if isPublic
+        " -f private=false"
+        " -f private=true"))))
+    (let ((withDesc 
       (match descOpt
         ((DNone) base)
         ((DSome d) (strConcat (strConcat base " -f description=") (shellQuote d))))))

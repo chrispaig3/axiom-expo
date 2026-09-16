@@ -31,29 +31,34 @@
 (pub fn (expoMain)
   (handle
     (region outer
-      {
-        (if (< sysArgc 2)
-          (printUsage 1)
-          (let ((cmd (sysArg 1)))
-            (if (|| (strEq cmd "-h") (strEq cmd "--help"))
-              (printUsage 0)
-              (if (|| (strEq cmd "-v") (strEq cmd "--version"))
-                {
-                  (println "expo v2.0.1")
-                  0
-                }
-                (match (parseCmd cmd)
-                  ((None)
-                    {
-                      (eprintln "Error: unknown command '{cmd}'")
-                      (printUsage 1)
-                    })
-                  ((Some c)
-                    (match c
-                      ((Delete) (runDelete 2 sysArgc))
-                      ((Visibility) (runVisibility 2 sysArgc))
-                      ((Archive) (runArchive 2 sysArgc))
-                      ((Create) (runCreate 2 sysArgc)))))))))
-      })
+      (if (< sysArgc 2)
+        (printUsage 1)
+        (let ((cmd (sysArg 1)))
+          (if (|| (strEq cmd "-h") (strEq cmd "--help"))
+            (printUsage 0)
+            (if (|| (strEq cmd "-v") (strEq cmd "--version"))
+              {
+                (println "expo v2.0.1")
+                0
+              }
+              (match (parseCmd cmd)
+                ((None)
+                  {
+                    (eprintln "Error: unknown command '{cmd}'")
+                    (printUsage 1)
+                  }
+                )
+                ((Some c)
+                  (match c
+                    ((Delete) (runDelete 2 sysArgc))
+                    ((Visibility) (runVisibility 2 sysArgc))
+                    ((Archive) (runArchive 2 sysArgc))
+                    ((Create) (runCreate 2 sysArgc)))
+                )))))))
     (Log IO Alloc Mut)
-    (lambda (m) { (eprintln m) 0 })))
+    (lambda (m)
+      {
+        (eprintln m)
+        0
+      }
+    )))

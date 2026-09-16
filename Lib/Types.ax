@@ -13,7 +13,7 @@
   (Private))
 
 ; Optional --description: BEmpty = absent, BFull d = first value wins.
-(pub data DescOpt (a)
+(pub data DescOpt a
   (DNone)
   (DSome a))
 
