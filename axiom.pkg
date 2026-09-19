@@ -1,4 +1,10 @@
+main expo.ax
 name axiom-expo
 version 2.0.1
 
 depend .
+
+# `depend` names a directory of modules (or a git URL to check out
+# under `.axiom/deps/`), `crate` a native crate directory, `opt` the
+# default optimisation level (0-3) and `main` the entry file.
+# depend  vendor/lib
