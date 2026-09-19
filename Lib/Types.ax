@@ -28,4 +28,4 @@
 
 ; Structured expo log line; main installs the handler.
 (effect Log
-  (logLine :: (-> String Int)))
+  (msg :: (-> String Int)))
