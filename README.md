@@ -12,15 +12,16 @@
 
 ## Building
 
-0. Install Axiom latest
+### Install Axiom latest
 
-- Prerequisites: Make sure you have Rust, and LLVM installed. `llc` needs to be in PATH.
+- Prerequisites: Make sure you have LLVM installed; `llc` needs to be in PATH.
   - You also need the GitHub CLI; that is is how authentication is handled.
 - clone `https://github.com/chrispaig3/Axiom`
-- run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path
-1. install the build tool `cargo install just`
-2. run `just`
-3. add it to PATH
+- run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path1. install the build tool `cargo install just`
+1. run `cd axiom-expo`
+2. run `axiom build`
+3. add it to PATH (optional)
+
 > The binary size of Expo is only 74.5 kb
 
 ## Basic Usage
