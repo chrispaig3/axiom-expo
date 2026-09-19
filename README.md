@@ -17,7 +17,8 @@
 - Prerequisites: Make sure you have LLVM installed; `llc` needs to be in PATH.
   - You also need the GitHub CLI; that is is how authentication is handled.
 - clone `https://github.com/chrispaig3/Axiom`
-- run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path1. install the build tool `cargo install just`
+- run `./scripts/bootstrap-from-seed.sh --install .axiom-bin` and then add it to path.
+
 1. run `cd axiom-expo`
 2. run `axiom build`
 3. add it to PATH (optional)
