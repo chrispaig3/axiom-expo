@@ -69,6 +69,7 @@
   (argvToShellFrom argv 0 (vecLen argv) ""))
 
 (pub :: argvToShellFrom (-> (Vec String) Int Int String String))
+;@axiom:effect(unsafe)
 (pub fn (argvToShellFrom argv i n acc)
   (if (>= i n)
     acc
@@ -92,6 +93,9 @@
 ; delete --yes batch: one `gh api -X DELETE` per valid repo through the
 ; bounded Par pool. Submit order is kept for stable output.
 ;@axiom:effect(io)
+;@axiom:effect(unsafe)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runBatchDelete (-> (Vec String) Int))
 (pub fn (runBatchDelete repos)
   (region batch
@@ -144,6 +148,9 @@
 
 ; visibility batch: `gh api -X PATCH -f private=B` per valid repo.
 ;@axiom:effect(io)
+;@axiom:effect(unsafe)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runBatchVisibility (-> (Vec String) VisState Int))
 (pub fn (runBatchVisibility repos vs)
   (region batch
@@ -202,6 +209,9 @@
 
 ; archive batch: `gh api -X PATCH -f archived=B` per valid repo.
 ;@axiom:effect(io)
+;@axiom:effect(unsafe)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runBatchArchive (-> (Vec String) Bool Int))
 (pub fn (runBatchArchive repos doArchive)
   (region batch
@@ -257,6 +267,9 @@
 ; delete handler: dry-run in order, or concurrent `gh` with --yes.
 ; Validation runs before auth, matching the reference routing.
 ;@axiom:effect(io)
+;@axiom:effect(unsafe)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runDelete (-> Int Int Int))
 (pub fn (runDelete from n)
   (let (
@@ -291,6 +304,8 @@
 
 ; visibility handler: state is argv[from] exactly, then lenient repos.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runVisibility (-> Int Int Int))
 (pub fn (runVisibility from n)
   (if (>= from n)
@@ -323,6 +338,8 @@
 
 ; archive handler: --unarchive flips the archived bit.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runArchive (-> Int Int Int))
 (pub fn (runArchive from n)
   (let (
@@ -347,6 +364,8 @@
 
 ; create handler: strict flags, sequential fail-fast.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runCreate (-> Int Int Int))
 (pub fn (runCreate from n)
   (region cparse
@@ -411,6 +430,9 @@
 
 ; Sequential create loop with InvalidRepository checks.
 ;@axiom:effect(io)
+;@axiom:effect(unsafe)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: createSeq (-> (Vec String) Bool (DescOpt String) Int Int))
 (pub fn (createSeq repos isPublic descOpt idx)
   (if (>= idx (vecLen repos))
@@ -449,6 +471,8 @@
 ; pid-unique temp file. Single `gh` invocation.
 ; Answers Pair(code, stderr): 0 ok, 1 already-exists, 2 other failure.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runCreateOne (-> String Bool (DescOpt String) (Pair Int String)))
 (pub fn (runCreateOne repo isPublic descOpt)
   (let ((tmp (strConcat "/tmp/expo-err-" (fmtInt (sysGetPid)))))
@@ -461,7 +485,8 @@
           (let ((rc (runGh shargs)))
             (let ((err (readFile tmp)))
               {
-                (removeFile tmp)
+                (let ((_ (removeFile tmp)))
+                  0)
                 (if (!= rc 0)
                   (if (containsSub err "already exists")
                     (Pair 1 err)

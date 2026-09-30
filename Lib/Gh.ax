@@ -98,6 +98,7 @@
           {
             (vecPush v "-f")
             (vecPush v (strConcat "description=" d))
+            0
           }
         ))
       v
@@ -105,6 +106,8 @@
 
 ; Run one argv via PATH. >=0 is the exit code, <0 is spawn errno.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: runGh (-> (Vec String) Int))
 (pub fn (runGh argv)
   (match (parRunOne argv)
@@ -115,6 +118,8 @@
 ; reference routing: success to stdout, failures to stderr.
 ; Answers 0 ok, 1 bad credentials, 2 spawn failure.
 ;@axiom:effect(io)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub :: doAuth Int)
 (pub fn (doAuth)
   (let ((shargs vecNew))

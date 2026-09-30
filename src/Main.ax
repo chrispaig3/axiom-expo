@@ -28,6 +28,8 @@
 ; Entry dispatch. Auth gates every subcommand; help/version short-circuit.
 ;@axiom:effect(io)
 (pub :: expoMain Int)
+;@axiom:effect(spawn)
+;@axiom:effect(block)
 (pub fn (expoMain)
   (handle
     (region outer
@@ -55,7 +57,7 @@
                     ((Archive) (runArchive 2 sysArgc))
                     ((Create) (runCreate 2 sysArgc)))
                 )))))))
-    (Log IO Alloc Mut)
+    (Log IO Alloc Mut Unsafe Spawn Block)
     (lambda (m)
       {
         (eprintln m)
